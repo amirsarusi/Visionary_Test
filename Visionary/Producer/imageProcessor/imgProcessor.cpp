@@ -6,7 +6,7 @@
 #include <opencv2/opencv.hpp>
 #include "../params.h"
 
-imgProcessor::imgProcessor( std::vector<std::string> imgPaths, std::queue<MatSend>& qSend,int thread_id): imgPaths(imgPaths),qSend(qSend), thread_id(thread_id)
+imgProcessor::imgProcessor(std::vector<std::string> imgPaths, std::queue<MatSend>& qSend,int thread_id,int numCpu): imgPaths(imgPaths),qSend(qSend), thread_id(thread_id),numCpu(numCpu)
 {
     std::cout << "imgProcessor " << thread_id << " has been instantiated" << std::endl;
 }
@@ -26,7 +26,7 @@ void imgProcessor::processImages()
             img = cv::imread(path);
             cv::imencode(".jpg", img, encodedImg, compression_params);
             auto total_pack = 1 + (encodedImg.size() - 1) / PACK_SIZE;
-            auto pEncodedImg = std::make_pair(std::make_pair(thread_id * (1 + numOfIterations),total_pack),encodedImg);
+            auto pEncodedImg = std::make_pair(std::make_pair(thread_id + numCpu * numOfIterations,total_pack),encodedImg);
             qSend.push(pEncodedImg);
 
         }catch(cv::Exception e)

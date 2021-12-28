@@ -11,6 +11,7 @@
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <opencv2/opencv.hpp>
+#include "../blockingQueue/blockingQueue.h"
 
 typedef struct {
     int id;
@@ -21,7 +22,7 @@ typedef struct {
 class udpListener
 {
 public:
-    udpListener(std::string local_ip,std::string f_ip ,int local_port, int f_port ,bool& shouldStop, std::queue<std::pair<int,cv::Mat>>& qOut,std::vector<std::queue<preProcessedImg>>& vWorkersQ);
+    udpListener(std::string local_ip,std::string f_ip ,int local_port, int f_port ,bool& shouldStop, blockingQueue<std::pair<int,cv::Mat>>& qOut,std::vector<blockingQueue<preProcessedImg>>& vWorkersQ,int processor_count);
     ~udpListener();
     void listen();
 private:
@@ -31,8 +32,9 @@ private:
     unsigned short f_port;
     volatile bool& shouldStop;
     UDPSocket udp_socket;
-    std::queue<std::pair<int,cv::Mat>>& qOut;
-    std::vector<std::queue<preProcessedImg>>& vWorkersQ;
+    blockingQueue<std::pair<int,cv::Mat>>& qOut;
+    std::vector<blockingQueue<preProcessedImg>>& vWorkersQ;
+    int processor_count;
 };
 
 

@@ -8,20 +8,23 @@
 #include <opencv2/opencv.hpp>
 #include "../udpListener/udpListener.h"
 #include "../params.h"
+#include "../blockingQueue/blockingQueue.h"
+
 using namespace cv;
 
 class imgProcessor {
 public:
-    imgProcessor(std::queue<std::pair<int,cv::Mat>>& qOut, std::queue<preProcessedImg>& qPri,volatile bool& shouldStop,int threadID);
+    imgProcessor(blockingQueue<std::pair<int,cv::Mat>>& qOut, blockingQueue<preProcessedImg>& qPri,volatile bool& shouldStop,int threadID);
     ~imgProcessor();
     void processImg();
 private:
     void cleanup();
 
-    std::queue<std::pair<int,cv::Mat>>& qOut;
-    std::queue<preProcessedImg>& qPri;
+    blockingQueue<std::pair<int,cv::Mat>>& qOut;
+    blockingQueue<preProcessedImg>& qPri;
     volatile bool& shouldStop;
     int threadID;
+    int processor_count;
 };
 
 

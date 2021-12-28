@@ -12,12 +12,13 @@
 
 class imgProcessor {
 public:
-    imgProcessor(  std::vector<std::string> imgPaths, std::queue<MatSend>& qSend,int thread_id);
+    imgProcessor(std::vector<std::string> imgPaths, std::queue<MatSend>& qSend,int thread_id,int numCpu);
     void processImages();
 private:
     std::vector<std::string> imgPaths;
     std::queue<MatSend>& qSend;
     int thread_id;
+    int numCpu;
 
 
 };

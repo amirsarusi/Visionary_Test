@@ -7,8 +7,8 @@
 #include "../imgProcessor/ImgProcessor.h"
 #include <thread>
 
-udpListener:: udpListener(std::string local_ip,std::string f_ip ,int local_port, int f_port ,bool& shouldStop,std::queue<std::pair<int,cv::Mat>>& qOut,std::vector<std::queue<preProcessedImg>>& vWorkersQ):
-local_ip(local_ip),f_ip(f_ip),local_port(local_port),f_port(f_port),shouldStop(shouldStop),udp_socket(local_ip,local_port),qOut(qOut),vWorkersQ(vWorkersQ)
+udpListener:: udpListener(std::string local_ip,std::string f_ip ,int local_port, int f_port ,bool& shouldStop,blockingQueue<std::pair<int,cv::Mat>>& qOut,std::vector<blockingQueue<preProcessedImg>>& vWorkersQ,int processor_count):
+local_ip(local_ip),f_ip(f_ip),local_port(local_port),f_port(f_port),shouldStop(shouldStop),udp_socket(local_ip,local_port),qOut(qOut),vWorkersQ(vWorkersQ),processor_count(processor_count)
 {
 
 }
@@ -16,12 +16,22 @@ local_ip(local_ip),f_ip(f_ip),local_port(local_port),f_port(f_port),shouldStop(s
 void udpListener::listen()
 {
     auto size_rec = -1;
-    const auto processor_count = std::thread::hardware_concurrency() / 2;
     auto workerShouldStop = false;
     auto iterationNum = 0;
+    auto gotImageAmount = false;
     int headerBuff[2];
     int buffer[PACK_SIZE];
     preProcessedImg pri;
+
+
+/*    while(!gotImageAmount)
+    {
+        do {
+            size_rec = udp_socket.recvFrom(headerBuff, 2 * sizeof(int), (std::string &) LOCAL_HOST, f_port);
+        } while (size_rec > sizeof(int));
+    }*/
+
+
     while(true)
     {
         // when we send a message the first int that arrives are the number of packets the image was split to
@@ -41,7 +51,7 @@ void udpListener::listen()
         for (int i = 0; i < total_pack; i++) {
             size_rec = udp_socket.recvFrom(buffer, PACK_SIZE, (std::string &) LOCAL_HOST, f_port);
             if (size_rec != PACK_SIZE) {
-                std::cerr << "Received unexpected size pack:" << size_rec << std::endl;
+                //std::cerr << "Received unexpected size pack:" << size_rec << std::endl;
                 continue;
             }
             memcpy( &rawImageBuff[i * PACK_SIZE], buffer, PACK_SIZE);
@@ -51,7 +61,7 @@ void udpListener::listen()
         pri.numOfPackets = total_pack;
         pri.data = new char[total_pack*PACK_SIZE];
         memcpy(pri.data,rawImageBuff,total_pack*PACK_SIZE);
-        vWorkersQ[iterationNum % processor_count].push(pri);
+        vWorkersQ[iterationNum % processor_count].Put(pri);
         free(rawImageBuff);
         iterationNum++;
     }

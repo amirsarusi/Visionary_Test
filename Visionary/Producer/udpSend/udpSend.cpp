@@ -21,11 +21,17 @@ void udpSend::send()
 {
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     auto totalPacks = 0;
+    //int sideBuff[0];
+    //sideBuff[0] = numOfImages;
+    //udp_socket.sendTo(sideBuff, sizeof(int), local_ip, f_port);
+
+
     while(numOfImages > 0)
     {
         if(!qSend.empty())
         {
             auto eSend = qSend.front();
+            qSend.pop();
             int ibuf[2];
             ibuf[0] = eSend.first.first;
             ibuf[1] = eSend.first.second;
@@ -37,7 +43,6 @@ void udpSend::send()
                 totalPacks++;
             }
             std::cout << "udpSend has sent image #" << eSend.first.first << std::endl;
-            qSend.pop();
             numOfImages--;
         }
     }

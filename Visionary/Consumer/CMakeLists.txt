@@ -14,7 +14,7 @@ add_executable(Consumer main.cpp
                udpSocket/udpSocket.cpp udpSocket/udpSocket.h
                threadpool/threadpool.cpp threadpool/threadpool.h
                udpListener/udpListener.cpp udpListener/udpListener.h
-        imgProcessor/ImgProcessor.h params.h imgProcessor/ImgProcessor.cpp)
+        imgProcessor/ImgProcessor.h params.h imgProcessor/ImgProcessor.cpp blockingQueue/blockingQueue.h)
 target_link_libraries(Consumer ${OpenCV_LIBS})
 include_directories(${Boost_INCLUDE_DIRS})
 target_link_libraries(Consumer ${Boost_LIBRARIES})

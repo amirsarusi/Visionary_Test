@@ -1,7 +1,5 @@
 /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/Applications/CLion.app/Contents/bin/ninja/mac/ninja -G Ninja /Users/amirsarusi/CLionProjects/Visionary/Producer
--- Found OpenCV: /usr/local/Cellar/opencv/4.5.4_1 (found version "4.5.4") 
 -- start running cmake...
--- Found Boost: /usr/local/lib/cmake/Boost-1.76.0/BoostConfig.cmake (found suitable version "1.76.0", minimum required is "1.76.0")  
 -- boost found
 -- Configuring done
 -- Generating done

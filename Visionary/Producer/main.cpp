@@ -11,13 +11,12 @@ std::vector<std::string> getAllPaths(const std::string& path);
 
 int main(int argc, char *argv[] ) {
     std::cout << std::filesystem::current_path() << std::endl;
-    //std::string ImagePath = argv[1];
-    std::string ImagePath = "/Images";
+    std::string ImagePath = argv[1];
+    //std::string ImagePath = "/Images";
     std::string fullPath = std::filesystem::current_path().string() + ImagePath;
-    //std::cout << "full path is: " << fullPath;
     std::vector<std::string> vIpath = getAllPaths(fullPath);
     std::sort(vIpath.begin(),vIpath.end());
-    auto numCpu = std::thread::hardware_concurrency() / 2 ;
+    auto numCpu = std::thread::hardware_concurrency() ;
     auto vThread = std::vector<std::thread>(numCpu);
     auto vThreadPaths = std::vector<std::vector<std::string>>(numCpu);
     auto qOutSend = std::queue<MatSend>();
@@ -31,7 +30,7 @@ int main(int argc, char *argv[] ) {
 
     for(int i = 0; i < numCpu ; i++)
     {
-        vThread[i] = std::thread(&imgProcessor::processImages, imgProcessor(vThreadPaths[i],qOutSend,i + 1));
+        vThread[i] = std::thread(&imgProcessor::processImages, imgProcessor(vThreadPaths[i],qOutSend,i + 1,numCpu));
     }
 
     for(int i = 0 ; i < numCpu ; i++)

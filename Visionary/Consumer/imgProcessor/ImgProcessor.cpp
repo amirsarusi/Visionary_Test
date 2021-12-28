@@ -3,7 +3,7 @@
 //
 #include "ImgProcessor.h"
 
-imgProcessor::imgProcessor(std::queue<std::pair<int,cv::Mat>>& qOut, std::queue<preProcessedImg>& qPri,volatile bool& shouldStop,int threadID): qOut(qOut), qPri(qPri),shouldStop(shouldStop),threadID(threadID)
+imgProcessor::imgProcessor(blockingQueue<std::pair<int,cv::Mat>>& qOut, blockingQueue<preProcessedImg>& qPri,volatile bool& shouldStop,int threadID): qOut(qOut), qPri(qPri),shouldStop(shouldStop),threadID(threadID)
 {
 
 }
@@ -20,8 +20,7 @@ void imgProcessor::processImg()
         {
             try
             {
-                auto pri = qPri.front();
-                qPri.pop();
+                auto pri = qPri.Take();
                 Mat rawData = Mat(1,PACK_SIZE * pri.numOfPackets,CV_8UC1,pri.data);
                 Mat frame = imdecode(rawData, IMREAD_COLOR);
                 if(frame.data == 0) // failed to decode
@@ -30,7 +29,7 @@ void imgProcessor::processImg()
                     return;
                 }
                 std::cout << "thread number " << threadID << " processed image id: " << pri.id << std::endl;
-                qOut.push(std::make_pair(pri.id,frame));
+                qOut.Put(std::make_pair(pri.id,frame));
                 free(pri.data);
 
             }catch(Exception e)
@@ -51,8 +50,7 @@ void imgProcessor::cleanup()
     do{
         try
         {
-            auto pri = qPri.front();
-            qPri.pop();
+            auto pri = qPri.Take();
             Mat rawData = Mat(1,PACK_SIZE * pri.numOfPackets,CV_8UC1,pri.data);
             Mat frame = imdecode(rawData, IMREAD_COLOR);
             if(frame.data == 0) // failed to decode
@@ -61,7 +59,7 @@ void imgProcessor::cleanup()
                 return;
             }
             std::cout << "thread number " << threadID << " processed image id: " << pri.id << std::endl;
-            qOut.push(std::make_pair(pri.id,frame));
+            qOut.Put(std::make_pair(pri.id,frame));
             free(pri.data);
 
         }catch(Exception e)

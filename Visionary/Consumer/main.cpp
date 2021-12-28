@@ -5,7 +5,7 @@
 #include "udpListener/udpListener.h"
 #include "imgProcessor/ImgProcessor.h"
 #include <chrono>
-
+#include "blockingQueue/blockingQueue.h"
 
 using namespace std;
 using namespace cv;
@@ -16,17 +16,17 @@ int main()
 {
     auto shouldStop = false;
     auto workerShouldStop = false;
-    auto preProcessedQueue = std::queue<preProcessedImg>();
-    auto qOutput = std::queue<std::pair<int,Mat>>();
+    auto qOutput = blockingQueue<std::pair<int,Mat>>();
     const auto processor_count = std::thread::hardware_concurrency() / 2;
-    auto vWorkerQ = std::vector<std::queue<preProcessedImg>>(processor_count);
+    //const auto processor_count =  1;
+
+    auto vWorkerQ = std::vector<blockingQueue<preProcessedImg>>(processor_count);
     auto vThreads = std::vector<std::thread>(processor_count);
     for(int i = 0; i < processor_count ; i++)
     {
-        vWorkerQ[i] = std::queue<preProcessedImg>();
         vThreads[i] = std::thread(&imgProcessor::processImg, imgProcessor(qOutput,vWorkerQ[i],workerShouldStop,i));
     }
-    auto udp_rec = udpListener(LOCAL_HOST, LOCAL_HOST, CONSUMER_PORT, PRODUCER_PORT, shouldStop,qOutput,vWorkerQ);
+    auto udp_rec = udpListener(LOCAL_HOST, LOCAL_HOST, CONSUMER_PORT, PRODUCER_PORT, shouldStop,qOutput,vWorkerQ,processor_count);
     auto tListener = std::thread(&udpListener::listen,&udp_rec);
     auto gotFirst = false;
     auto totalImages = 0;
@@ -44,8 +44,7 @@ int main()
 
                 gotFirst = true;
             }
-            auto pImg = qOutput.front();
-            qOutput.pop();
+            auto pImg = qOutput.Take();
             if(pImg.first > maxID)
             {
                 imshow("[img]",pImg.second);
