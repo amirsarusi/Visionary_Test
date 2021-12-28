@@ -60,9 +60,11 @@ void udpListener::listen()
 
 udpListener::~udpListener()
 {
-    udp_socket.disconnect();
+    std::cout << "udpListener has been terminated" << std::endl;
     udp_socket.cleanUp();
+    udp_socket.disconnect();
 }
+
 
 
 

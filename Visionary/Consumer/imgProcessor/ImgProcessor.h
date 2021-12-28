@@ -16,6 +16,8 @@ public:
     ~imgProcessor();
     void processImg();
 private:
+    void cleanup();
+
     std::queue<std::pair<int,cv::Mat>>& qOut;
     std::queue<preProcessedImg>& qPri;
     volatile bool& shouldStop;

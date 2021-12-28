@@ -40,5 +40,34 @@ void imgProcessor::processImg()
             }
         }
     }
+    if(!qPri.empty())
+    {
+        cleanup();
+    }
+}
 
+void imgProcessor::cleanup()
+{
+    do{
+        try
+        {
+            auto pri = qPri.front();
+            qPri.pop();
+            Mat rawData = Mat(1,PACK_SIZE * pri.numOfPackets,CV_8UC1,pri.data);
+            Mat frame = imdecode(rawData, IMREAD_COLOR);
+            if(frame.data == 0) // failed to decode
+            {
+                delete pri.data;
+                return;
+            }
+            std::cout << "thread number " << threadID << " processed image id: " << pri.id << std::endl;
+            qOut.push(std::make_pair(pri.id,frame));
+            free(pri.data);
+
+        }catch(Exception e)
+        {
+            std::cout << "thread number " << threadID << " has encountered an error while decoding an image " << std::endl;
+            continue;
+        }
+    }while(!qPri.empty());
 }

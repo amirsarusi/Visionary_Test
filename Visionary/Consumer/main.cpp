@@ -4,10 +4,11 @@
 #include "params.h"
 #include "udpListener/udpListener.h"
 #include "imgProcessor/ImgProcessor.h"
+#include <chrono>
+
 
 using namespace std;
 using namespace cv;
-
 
 
 
@@ -28,7 +29,10 @@ int main()
     auto udp_rec = udpListener(LOCAL_HOST, LOCAL_HOST, CONSUMER_PORT, PRODUCER_PORT, shouldStop,qOutput,vWorkerQ);
     auto tListener = std::thread(&udpListener::listen,&udp_rec);
     auto gotFirst = false;
+    auto totalImages = 0;
     cv::namedWindow( "[img]", WINDOW_AUTOSIZE );
+
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     while(!shouldStop)
     {
         auto maxID = 0;
@@ -36,7 +40,8 @@ int main()
         {
             if(!gotFirst)
             {
-                tBegin = clock();
+                begin = std::chrono::steady_clock::now();
+
                 gotFirst = true;
             }
             auto pImg = qOutput.front();
@@ -47,17 +52,24 @@ int main()
                 cv::waitKey(10);
                 maxID = pImg.first;
             }
+            totalImages++;
 
         }
     }
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
     workerShouldStop = true;
+    tListener.join();
     for(auto& t : vThreads)
     {
         t.join();
     }
-    std::destroy(vWorkerQ.begin(), vWorkerQ.end());
-    std::destroy(vThreads.begin(), vThreads.end());
-    std::cout << "press any key to continue..." << std::endl;
-    while(true){}
+
+    char n;
+    std::cout << totalImages << " have been streamed and displayed for a total of " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count()
+        << " [seconds] " << "for average fps of: " << (double)totalImages / std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "[frame / second]" << std::endl;
+    std::cout << "press any key then enter key to exit..." << std::endl;
+    std::cin >> n;
+    cv::destroyAllWindows();
     return 0;
 }

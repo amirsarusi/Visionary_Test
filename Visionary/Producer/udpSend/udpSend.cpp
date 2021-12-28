@@ -12,12 +12,14 @@ local_ip(local_ip),local_port(local_port),f_port(f_port),numOfImages(numOfImages
 
 udpSend::~udpSend()
 {
-    std::cout << "udpSend has been instantiated" << std::endl;
+    std::cout << "udpSend has been terminated" << std::endl;
+    udp_socket.cleanUp();
+    udp_socket.disconnect();
 }
 
 void udpSend::send()
 {
-    auto tBegin = clock();
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     auto totalPacks = 0;
     while(numOfImages > 0)
     {
@@ -39,9 +41,9 @@ void udpSend::send()
             numOfImages--;
         }
     }
-    auto tEnd = clock();
-    auto duration = (tEnd - tBegin) / CLOCKS_PER_SEC;
-    std::cout << "Total sending time:" << duration << " \tkbps:" << (PACK_SIZE * totalPacks / duration / 1024 * 8) << std::endl;
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - begin).count();
+    std::cout << "Total sending time:" << duration << "[seconds]\tkbps:" << (PACK_SIZE * totalPacks / duration / 1024 * 8) << std::endl;
 
     int ibuf[2];
     ibuf[0] = -1;
