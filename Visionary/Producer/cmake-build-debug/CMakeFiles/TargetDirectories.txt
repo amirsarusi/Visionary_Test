@@ -1,0 +1,3 @@
+/Users/amirsarusi/CLionProjects/Visionary/Producer/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/amirsarusi/CLionProjects/Visionary/Producer/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/amirsarusi/CLionProjects/Visionary/Producer/cmake-build-debug/CMakeFiles/Producer.dir
